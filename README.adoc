@@ -1,7 +1,7 @@
 # Defect Prediction on Apache OpenJPA
 
 [![Language](https://img.shields.io/badge/language-Python%20%2B%20Java-blue)]()
-[![Course](https://img.shields.io/badge/course-Software%20Engineering%20II-red)]()
+[![Course](https://img.shields.io/badge/institution-Tor%20Vergata%20Rome-red)]()
 
 Can we predict which Java classes will contain bugs — before they do? A four-milestone empirical study applying walk-forward defect prediction, counterfactual analysis, LLM-assisted refactoring and mutation testing to Apache OpenJPA, a real-world open-source JPA implementation with 13 releases and 10,290 labelled instances.
 
@@ -36,7 +36,7 @@ Can we predict which Java classes will contain bugs — before they do? A four-m
 ## Tech stack
 
 - **Languages:** Python (pipeline, analysis), Java (OpenJPA codebase, JUnit tests)
-- **ML:** Weka (walk-forward pipeline), pandas, scikit-learn
+- **ML:** Weka (walk-forward pipeline), pandas
 - **Static analysis:** PMD (code smells), CK metrics
 - **Testing:** JUnit 5, Randoop, PIT mutation testing
 - **CI/CD:** GitHub Actions
@@ -48,7 +48,7 @@ Can we predict which Java classes will contain bugs — before they do? A four-m
 ├── tools/GetVersionsFromJIRA/    JIRA REST API — release retrieval (M1)
 ├── tools/GetTicketsID/           JIRA REST API — bug ticket retrieval (M1)
 ├── tools/M2WekaPipeline/         Walk-forward classifier evaluation (M2) + What-If analysis (M3)
-├── m4/                           LLM-assisted refactoring experiments + test suites (BB, LLM, CF)
+├── m4/                           LLM-assisted refactoring experiments + test suites
 ├── m4_mutation/                  PIT mutation testing, Randoop tests, Nelson reliability estimation
 ├── .github/workflows/            CI pipeline (M4 mutation testing)
 ├── dataset_labeled.csv           Final labelled dataset (10,290 rows × 66 columns)
@@ -57,3 +57,12 @@ Can we predict which Java classes will contain bugs — before they do? A four-m
 ├── ticket_av.csv / ticket_files.csv   Bug ticket linkage and AV resolution
 ├── m2_results.csv                Walk-forward results (288 rows = 12 iterations × 24 configs)
 └── A.csv / B.csv / Bplus.csv / C.csv  Dataset variants for M3 What-If analysis
+```
+
+## Note on the use of AI
+
+LLM-assisted refactoring is part of the study itself (M4). All pipeline design, experimental methodology, interpretation of results and written content are the author's own work.
+
+## Context
+
+Università degli Studi di Roma Tor Vergata, A.A. 2025–26 (Erasmus exchange from URJC Madrid).
