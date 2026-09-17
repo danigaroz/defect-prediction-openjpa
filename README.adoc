@@ -1,73 +1,59 @@
-= Apache OpenJPA - README
+# Defect Prediction on Apache OpenJPA
 
-== Preface
-Thank you for downloading this release of Apache OpenJPA.
+[![Language](https://img.shields.io/badge/language-Python%20%2B%20Java-blue)]()
+[![Course](https://img.shields.io/badge/course-Software%20Engineering%20II-red)]()
 
-Apache OpenJPA is an implementation of the Jakarta Persistence API 3.0 specification.
+Can we predict which Java classes will contain bugs — before they do? A four-milestone empirical study applying walk-forward defect prediction, counterfactual analysis, LLM-assisted refactoring and mutation testing to Apache OpenJPA, a real-world open-source JPA implementation with 13 releases and 10,290 labelled instances.
 
+**Author:** Daniel Garoz Vazquez (Erasmus exchange) · **University:** Tor Vergata, Rome
 
-== License
-The content of this repository is licensed under Apache License 2.0
-http://www.apache.org/licenses/LICENSE-2.0
+> This repository is a fork of [apache/openjpa](https://github.com/apache/openjpa) used as the case-study subject. All work described below is the author's contribution; the rest of the codebase is the original Apache OpenJPA project.
 
-== Further Information
+---
 
-The following files can be found in the openjpa-project subdirectory:
+## Project overview
 
-* openjpa-project/BUILDING.txt
-* openjpa-project/CHANGES.txt
-* openjpa-project/RELEASE-NOTES.html
+| Milestone | Topic | Headline result |
+|---|---|---|
+| M1 | Dataset construction | 13-release dataset, 10,290 rows, 18.6% buggy ratio, JIRA-based labelling + Proportion estimation (P median = 1.5) |
+| M2 | Walk-forward defect prediction | Best classifier: Random Forest + SMOTE, **AUC = 0.897** (12 walk-forward iterations, 24 configurations) |
+| M3 | What-If counterfactual analysis | 1.5% of predicted buggy classes preventable by setting NSmells to zero |
+| M4 | LLM-assisted refactoring + mutation testing | Mutation score 13% → 25% → 29% across three iterations; Black-Box tests give 4× code retention improvement on the complex class |
 
-For documentation and project information, please visit our project site:
-    http://openjpa.apache.org/
+## Methodology
 
+| Step | Technique |
+|---|---|
+| Bug labelling | JIRA REST API + Proportion (P median) estimation for missing AV |
+| Features | PMD code smells, git process metrics, CK object-oriented metrics |
+| Classification | Random Forest, Naive Bayes, IBk — walk-forward temporal validation |
+| Class imbalance | SMOTE oversampling |
+| Counterfactual | What-If analysis on predicted buggy classes (M3) |
+| Refactoring | LLM-assisted (M4), Black-Box, and Randoop random test suites |
+| Mutation testing | PIT (PITest) — HTML reports uploaded as CI artifacts |
+| CI/CD | GitHub Actions — compiles, runs JUnit, executes PIT on every push to `m4_mutation/` |
 
-== Compiling
+## Tech stack
 
-The best way to compile Apache OpenJPA yourself is to run the build against the default derby database.
+- **Languages:** Python (pipeline, analysis), Java (OpenJPA codebase, JUnit tests)
+- **ML:** Weka (walk-forward pipeline), pandas, scikit-learn
+- **Static analysis:** PMD (code smells), CK metrics
+- **Testing:** JUnit 5, Randoop, PIT mutation testing
+- **CI/CD:** GitHub Actions
+- **Data:** JIRA REST API, git log
 
- $> mvn clean install -Dsurefire.excludes.locking=**/*
+## Repository structure (author's contribution)
 
-== Testing against different Databases
-
-The Apache OpenJPA project also contains a setup for testing against multiple databases.
-The easiest way is to use Docker.
-We assume that Docker is installed to be used by your current user.
-The respective database image has to be started manually before starting the build.
-The reason for not starting it as part of the build itself is to be able to look at the database content after the build did run.
-
-[TIP]
-====
-*Hint for running with Podman*
-
-Some distributions switched from native Docker to Podman.
-If you get an error like `missing DOCKER_HOST` then you might try running the following command:
-
-  export DOCKER_HOST="unix:/run/user/$(id -u)/podman/podman.sock"
-  podman system service -t 3600 &
-  mvn ...
-====
-
-To start e.g. a PostgreSQL Docker image you can simply invoke the following command.
-Note the -N Maven option which stands for 'non-recursive'.
-This is used because the docker container is configured only at the root project but not at his children.
-
- mvn -N -Ptest-mysql-docker docker:start
-
-After that, you can execute your tests with the respective Maven profile
-
- mvn clean install -Ptest-mysql-docker
-
-Once the Docker image for the database is not needed any longer one can stop and remove it:
-
- mvn -N -Ptest-mysql-docker docker:stop
- mvn -N -Ptest-mysql-docker docker:remove
-
-
-The following Maven profiles do exist so far:
-
-* test-mysql-docker
-* test-mariadb-docker
-* test-postgresql-docker
-* test-mssql-docker
-* test-oracle-docker
+```text
+├── tools/GetVersionsFromJIRA/    JIRA REST API — release retrieval (M1)
+├── tools/GetTicketsID/           JIRA REST API — bug ticket retrieval (M1)
+├── tools/M2WekaPipeline/         Walk-forward classifier evaluation (M2) + What-If analysis (M3)
+├── m4/                           LLM-assisted refactoring experiments + test suites (BB, LLM, CF)
+├── m4_mutation/                  PIT mutation testing, Randoop tests, Nelson reliability estimation
+├── .github/workflows/            CI pipeline (M4 mutation testing)
+├── dataset_labeled.csv           Final labelled dataset (10,290 rows × 66 columns)
+├── smells_per_class.csv          PMD smells aggregated by class
+├── commit_metrics.csv            Process metrics from git log
+├── ticket_av.csv / ticket_files.csv   Bug ticket linkage and AV resolution
+├── m2_results.csv                Walk-forward results (288 rows = 12 iterations × 24 configs)
+└── A.csv / B.csv / Bplus.csv / C.csv  Dataset variants for M3 What-If analysis
